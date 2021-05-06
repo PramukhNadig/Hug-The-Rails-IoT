@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+//TODO make values colors red if out of bounds, make a textarea for warningchecker.get(0);
 
 class TSNR{
 
@@ -45,7 +46,7 @@ class TSNR{
         impact = 0;
         temperature = 0;
         objectSpeed = 0;
-        circumference = .003;
+        circumference = 33.333;
         objectDetected = false;
         objectMoving = false;
         is_gate = false;
@@ -75,33 +76,13 @@ class TSNR{
         temperature = Integer.parseInt(tokens[7]);
         objectSpeed = Integer.parseInt(tokens[8]);
 
-        if (tokens[3] == "1"){
-            objectDetected = true;
-        }
-        else{
-            objectDetected = false;
-        }
+        objectDetected = tokens[3].equals("1");
 
-        if (tokens[4] == "1"){
-            objectMoving = true;
-        }
-        else{
-            objectMoving = false;
-        }
+        objectMoving = tokens[4].equals("1");
 
-        if (tokens[5] == "1"){
-            is_gate = true;
-        }
-        else{
-            is_gate = false;
-        }
+        is_gate = tokens[5].equals("1");
 
-        if (tokens[9] == "1"){
-            gate_Open = true;
-        }
-        else{
-            gate_Open = false;
-        }
+        gate_Open = tokens[9].equals("1");
     }
 
     public void readLine(){
@@ -165,7 +146,7 @@ class TSNR{
 
 
 class IoT{
-    public long wheelCircumference = (long) 0.003;
+    public long wheelCircumference = (long) 33.3333;
     public int speed;
     public int wheelRPM;
     public int distance;
@@ -176,22 +157,22 @@ class IoT{
     public boolean isMoving;
     public boolean isGate;
     public boolean gateOpen;
-    public final double circumference = .003;
+    public final double circumference = 33.333;
 
 
 
 
-    public IoT(){
-        speed = 0;
-        wheelRPM = 0;
-        distance = 0;
-        impact = 0;
-        temperature = 0;
-        objectSpeed = 0;
-        objectDetected = false;
-        isMoving = false;
-        isGate = false;
-        gateOpen = false;
+    public IoT(TSNR router){
+        speed = router.get_speed();
+        wheelRPM = router.get_RPM();
+        distance = router.distance;
+        impact = router.get_impact();
+        temperature = router.get_temperature();
+        objectSpeed = router.get_objectSpeed();
+        objectDetected = router.get_Objdetected();
+        isMoving = router.get_isMoving();
+        isGate = router.get_isGate();
+        gateOpen = router.get_gateOpen();
     }
 
     public void set_speed(int router_speed){
@@ -240,17 +221,7 @@ class IoT{
 
     public ArrayList<String> warningChecker(int object_Speed, boolean object_on_track, boolean object_moving){
         ArrayList<String> output = new ArrayList<>();
-        int calculated_speed = (int) (wheelCircumference * wheelRPM);
 
-        //determine if wheel slippage is present
-        if((calculated_speed - speed) > 5){
-            output.add("Slippage Warning: Decrease Speed");
-        }
-
-
-        else if((calculated_speed - speed) > 3){
-            output.add("Slippage Warning: Brake");
-        }
 
         //if gate crossing is detected
         if(isGate){
@@ -261,7 +232,7 @@ class IoT{
                 output.add("Gate Crossing Detected: Decrease Speed");
             }
             else{
-                if(distance == 0){
+                if(distance < 100){
                     output.add("Blow Horn for 5 seconds");
                 }
                 output.add("Gate Crossing Detected: Brake");
@@ -444,7 +415,7 @@ class IoT{
 
         //create Queue that stores logs
         TSNR router = new TSNR();
-        IoT HTR = new IoT();
+        IoT HTR = new IoT(router);
         Log log = new Log();
         File logFile = new File("src/log.txt");
         Runnable update = new Runnable(){
@@ -489,43 +460,46 @@ class IoT{
         gate.setBounds(0, 100, 120, 20);
 
         JLabel gateStatus = new JLabel();
-        gateStatus.setBounds(240, 100, 200, 20);
+        gateStatus.setBounds(140, 100, 350, 20);
 
         JLabel speedText = new JLabel("Speed: ");
         speedText.setBounds(0, 50, 120, 40);
 
         JLabel speed = new JLabel();
-        speed.setBounds(240, 50, 120, 40);
+        speed.setBounds(140, 50, 120, 40);
 
 
         JLabel wheelRPM = new JLabel();
-        wheelRPM.setBounds(240, 150, 120, 20);
+        wheelRPM.setBounds(140, 150, 120, 20);
 
         JLabel wheelRPM_ = new JLabel("Wheel RPM: ");
         wheelRPM_.setBounds(0, 150, 120, 20);
 
 
         JLabel impact = new JLabel();
-        impact.setBounds(240, 200, 150, 40);
+        impact.setBounds(140, 200, 150, 40);
 
         JLabel impact_ = new JLabel("Impact Sensor Status: ");
         impact_.setBounds(0, 200, 200, 40);
 
         JLabel object = new JLabel();
-        object.setBounds(240, 250, 300, 40);
+        object.setBounds(140, 250, 300, 40);
 
         JLabel object_ = new JLabel("Object Sensor: ");
         object_.setBounds(0, 250, 120, 40);
 
         JLabel temperature = new JLabel();
-        temperature.setBounds(240, 300, 150, 40);
+        temperature.setBounds(140, 300, 150, 40);
 
         JLabel temperature_ = new JLabel("Temperature: ");
         temperature_.setBounds(0, 300, 120, 40);
 
-        JLabel isMoving = new JLabel();
-         isMoving.setBounds(240, 250, 150, 40);
 
+        JLabel notification = new JLabel("Current Warning: ");
+        notification.setBounds(0, 350, 120, 40);
+
+        JLabel notification_ = new JLabel();
+        notification_.setBounds(140, 350, 350, 40);
 
         JButton button = new JButton("Enter");
         button.setBounds(200, 550, 200, 100);
@@ -562,6 +536,8 @@ class IoT{
         parent.add(temperature_);
         parent.add(button);
         parent.add(password);
+        parent.add(notification);
+        parent.add(notification_);
         //parent.add(admin);
         //parent.add(adminUser);
         //parent.add(adminPanel);
@@ -590,7 +566,6 @@ class IoT{
                             }
                         });
 
-                        // Grab log file for JTextArea and add it to panel
                         JTextArea logs = new JTextArea();
                         FileReader reader = new FileReader("src/log.txt");
                         logs.read(reader, "LOG");
@@ -598,7 +573,6 @@ class IoT{
                         logs.add(new JTextArea());
                         panel.add(logs);
 
-                        // Add scrollInfo to admin frame then set size and visibility
                         admin.add(scrollInfo);
                         admin.setSize(650, 650);
                         admin.setVisible(true);
@@ -616,12 +590,16 @@ class IoT{
         //Update all values in the GUI every second
         Timer SimpleTimer = new Timer(1000, new ActionListener() {
 
-
             @Override
             public void actionPerformed(ActionEvent e) {
                 speed.setText(String.valueOf(router.get_speed()) + " km/h");
                 temperature.setText((String.valueOf(router.get_temperature()) + " degrees Fahrenheit"));
-                impact.setText(String.valueOf(router.get_impact()));
+                if(HTR.warningChecker(router.get_speed(), router.get_Objdetected(), router.get_isMoving()).size() > 0){
+                    notification_.setText(HTR.warningChecker(router.get_speed(), router.get_Objdetected(), router.get_isMoving()).get(0));
+                }else{
+                    notification_.setText("No current warnings.");
+                }
+                impact.setText(String.valueOf(router.get_impact()) + " PSI");
                 if ((Math.abs(router.get_speed()) - router.get_RPM() * router.circumference) > 3) {
                     wheelRPM.setText(String.valueOf(router.get_RPM()));
                     wheelRPM.setForeground(Color.RED);
@@ -633,13 +611,19 @@ class IoT{
                 }
 
                 if (router.get_isGate()) {
-                    if(router.get_distance() < 1600) {
-                        gateStatus.setText("Gate detected " + router.get_distance() + " miles away. Blow Horn for 15 Seconds");
+                    if(router.get_distance() < 1600 && router.get_distance() > 200) {
+                        gateStatus.setText("Gate detected " + router.get_distance() + " meters away. Blow Horn for 15 Seconds");
                         gateStatus.setForeground(Color.RED);
-                        log.writeToLog(logFile, log.storeable_log("Gate detected " + router.get_distance() + " miles away. Blow Horn for 15 Seconds"));
-                    }else{
-                        gateStatus.setForeground(Color.ORANGE);
-                        gateStatus.setText("Gate detected " + router.get_distance() + " miles away.");
+                        log.writeToLog(logFile, log.storeable_log("Gate detected " + router.get_distance() + " meters away. Blow Horn for 15 Seconds"));
+                    }else if(router.get_distance() > 200){
+                        gateStatus.setText("Gate detected " + router.get_distance() + " meters away. Blow Horn for 5 Seconds");
+                        gateStatus.setForeground(Color.RED);
+                        log.writeToLog(logFile, log.storeable_log("Gate detected " + router.get_distance() + " meters away. Blow Horn for 15 Seconds"));
+
+                    }
+                    else{
+                        gateStatus.setForeground(new Color(255, 140, 0));
+                        gateStatus.setText("Gate detected " + router.get_distance() + " meter away.");
 
                     }
 
@@ -656,14 +640,26 @@ class IoT{
                     }
                 } else {
                     router.tempFlag = false;
+                    temperature.setForeground(Color.BLACK);
                 }
 
                 if (router.get_Objdetected()) {
 
-                    object.setText("Object Detected " + router.get_distance() + router.getMovingMessage());
-                    log.writeToLog(logFile, log.storeable_log("Object Detected " + router.get_distance() + router.getMovingMessage()));
+                    object.setText("Object Detected " + router.get_distance() +" " + router.getMovingMessage());
+                    object.setForeground(Color.RED);
+                    log.writeToLog(logFile, log.storeable_log("Object Detected " + router.get_distance() + " " + router.getMovingMessage()));
                 } else {
+                    object.setForeground(Color.BLACK);
                     object.setText("No Object Detected!");
+                }
+
+                if(router.get_impact() >= 100){
+                    impact.setForeground(Color.RED);
+                    impact.setText(router.get_impact() + " PSI Impact Detected!");
+                    log.writeToLog(logFile, log.storeable_log("Impacted Detected! PSI is " + router.get_impact()));
+                }else{
+                    impact.setForeground(Color.BLACK);
+                    impact.setText(String.valueOf(router.get_impact()) + " PSI");
                 }
             }
         });
