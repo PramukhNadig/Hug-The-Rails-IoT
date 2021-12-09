@@ -40,6 +40,10 @@ class TSNR{
     Scanner reader = null;
 
     public TSNR(){
+        /**
+         * Initializes the time sensitive network router with default parameters
+         * and opens the test file in order to get the inputs.
+         */
         speed = 0;
         wheelRPM = 0;
         distance = 0;
@@ -68,6 +72,10 @@ class TSNR{
      **/
 
     private void parser(String input){
+        /**
+         * parses a given string so that the router can use the values in the text file
+         * @param input  The line read from the file that the router is reading from
+         */
         String[] tokens = input.split(" ");
         speed = Integer.parseInt(tokens[0]);
         wheelRPM = Integer.parseInt(tokens[1]);
@@ -86,52 +94,105 @@ class TSNR{
     }
 
     public void readLine(){
+        /**
+         * Reads the next line from the input file and parses it, updating the values in the router.
+         */
 
         String data = reader.nextLine();
         parser(data);
 
     }
 
+    
+    /** 
+     * @return the current speed of the train
+     */
     public int get_speed(){
+
         return speed;
     }
 
+    
+    /** 
+     * @return the current RPM of the train wheels
+     */
     public int get_RPM(){
         return wheelRPM;
     }
 
+    
+    /** 
+     * @return The distance between the train and the next available object detected
+     */
     public int get_distance(){
         return distance;
     }
 
+    
+    /** 
+     * @return The PSI of the train at a certain impact position
+     */
     public int get_impact(){
         return impact;
     }
 
+    
+    /** 
+     * @return The temperature in the cabin of the train
+     */
     public int get_temperature(){
         return temperature;
     }
 
+    
+    /** 
+     * @return Return whether or not an object is detected
+     * True if an object is detected, false otherwise
+     */
     public boolean get_Objdetected(){
         return objectDetected;
     }
 
+    
+    /** 
+     * @return Return whether or not a detected object is moving in relation to the train
+     * True if an object is moving in relation to the train, false otherwise
+     */
     public boolean get_isMoving(){
         return objectMoving;
     }
 
+    
+    /** 
+     * @return Return whether the object detected is a gate
+     * True if the object is a gate, false otherwise
+     */
     public boolean get_isGate(){
         return is_gate;
     }
 
+    
+    /** 
+     * @return Return the speed of the object detected
+     * positive if the object is moving away from the train, negative if the object is moving towards the train
+     */
     public int get_objectSpeed(){
         return objectSpeed;
     }
 
+    
+    /** 
+     * @return Returns whether or not the gate detected is open
+     * True if the gate is open, false otherwise
+     */
     public boolean get_gateOpen(){
         return gate_Open;
     }
 
+    
+    /** 
+     * @return Returns the String representation of the object detected and the speed of the object if applicable for use in the GUI
+     */
     public String getMovingMessage(){
         if(get_isMoving()){
             return "Object Moving at " + get_objectSpeed() + "km/h ";
