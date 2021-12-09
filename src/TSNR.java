@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.util.Queue;
 import java.util.Scanner;
 
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.Executors;
@@ -38,7 +37,6 @@ class TSNR{
     public boolean is_gate;
     public boolean gate_Open;
     Scanner reader = null;
-
     public TSNR(){
         /**
          * Initializes the time sensitive network router with default parameters
@@ -64,18 +62,13 @@ class TSNR{
         }
 
     }
-    /** HTR = new IoT();
-     IoT.User peyrovian = IoT.User("Peyrovian", "CCRP", "Technician");
-     IoT.User conductor = new IoT.User("conductor", "password", "Regular");
-     IoT.User[] users = new IoT.User[]{peyrovian, conductor};
-     String permissions = HTR.login("Peyrovian", "CCRP", users);
-     **/
 
+    /**
+     * parses a given string so that the router can use the values in the text file
+     * @param input  The line read from the file that the router is reading from
+     */
     private void parser(String input){
-        /**
-         * parses a given string so that the router can use the values in the text file
-         * @param input  The line read from the file that the router is reading from
-         */
+
         String[] tokens = input.split(" ");
         speed = Integer.parseInt(tokens[0]);
         wheelRPM = Integer.parseInt(tokens[1]);
@@ -92,11 +85,11 @@ class TSNR{
 
         gate_Open = tokens[9].equals("1");
     }
-
+    /**
+     * Reads the next line from the input file and parses it, updating the values in the router.
+     */
     public void readLine(){
-        /**
-         * Reads the next line from the input file and parses it, updating the values in the router.
-         */
+
 
         String data = reader.nextLine();
         parser(data);
@@ -222,7 +215,10 @@ class IoT{
 
 
 
-
+     /**
+      * 
+      * @param router TSNR instance to read from
+      */
     public IoT(TSNR router){
         speed = router.get_speed();
         wheelRPM = router.get_RPM();
@@ -236,10 +232,18 @@ class IoT{
         gateOpen = router.get_gateOpen();
     }
 
+    /**
+     * 
+     * @param router_speed set the router speed according to what the sensors detect
+     */
     public void set_speed(int router_speed){
         speed = router_speed;
     }
 
+    /**
+     * 
+     * @param router_RPM The new RPM of the train detected by the sensors
+     */
     public void set_wheelRPM(int router_RPM){
         wheelRPM = router_RPM;
     }
@@ -279,7 +283,13 @@ class IoT{
 
 
 
-
+    /**
+     * 
+     * @param object_Speed
+     * @param object_on_track
+     * @param object_moving
+     * @return an ArrayList containing the warnings to display on the GUI
+     */
     public ArrayList<String> warningChecker(int object_Speed, boolean object_on_track, boolean object_moving){
         ArrayList<String> output = new ArrayList<>();
 
@@ -342,17 +352,29 @@ class IoT{
 
 
     //Log to store interactions between the Operator and IoT
+    //Static because only one instance of the log file should be running
     static class Log{
 
         public Log(){
+
         }
-        //Makes a string including date and time for event with warning message that can be stored in the log.
+        
+
+        /**
+         * 
+         * @param instruction The instruction to log
+         * @return String representation of the log message along with a time stamp.
+         */
         public String storeable_log(String instruction){
             Date date = new Date();
-            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
             return formatter.format(date)+": "+instruction;
         }
-
+        /**
+         * 
+         * @param file
+         * @param logged
+         */
         public void writeToLog(File file, String logged)  {
             Writer output = null;
             try {
@@ -361,8 +383,9 @@ class IoT{
                 e.printStackTrace();
             }
             try {
-                output.append(logged+ "\n");
+                output.append(logged + "\n");
             } catch (IOException e) {
+
                 e.printStackTrace();
             }
             try {
@@ -395,6 +418,7 @@ class IoT{
             return userID;
         }
 
+        
         public String get_password(){
             return password;
         }
